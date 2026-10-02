@@ -43,8 +43,6 @@ The four feature groups retain their validated game-archive patches. This releas
 
 Source is included in Setup.cs and Venus-Mods-Package. SHA256.txt covers the setup executable and embedded package; the package manifests cover archive combinations and character files.
 
-
-
 ## 1.1.3
 
 This release includes only the four feature groups listed above. No character pack or character-install option is bundled.
