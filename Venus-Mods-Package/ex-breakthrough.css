@@ -1,0 +1,28 @@
+.vu-ex-breakthrough{position:absolute;top:24px;right:32px;width:270px;max-width:calc(100vw - 48px);max-height:55vh;overflow:auto;pointer-events:auto;background:var(--vu-surface,#faf5e9);color:var(--vu-text,#302e29);border:1px solid var(--vu-border,#a79a80);border-radius:8px;padding:14px 16px;box-shadow:0 6px 24px #0003;font:12px/1.5 'Plus Jakarta Sans',sans-serif;z-index:8}
+.vu-ex-breakthrough-heading{display:flex;align-items:center;gap:6px;width:100%;padding:0 0 8px;border:0;background:none;color:inherit;text-align:left;font:18px 'Young Serif',serif;cursor:pointer}
+.vu-ex-breakthrough-heading small{margin-left:auto;font:10px 'Space Mono',monospace;white-space:nowrap}
+.vu-ex-breakthrough select,.vu-ex-breakthrough textarea{box-sizing:border-box;width:100%;font:inherit;color:var(--vu-text,#302e29);background:var(--vu-recessed,#eee7d7);border:1px solid var(--vu-border,#a79a80);border-radius:4px;padding:6px}
+.vu-ex-breakthrough textarea{resize:vertical;margin-top:6px;min-height:80px}
+.vu-ex-spirit-track{height:7px;border-radius:4px;overflow:hidden;background:var(--vu-recessed,#d7cebd);margin-top:10px;border:1px solid var(--vu-border,#a79a80)}
+.vu-ex-spirit-track span{display:block;height:100%;background:var(--vu-accent,#94712b);transition:width .4s ease}
+.vu-ex-breakthrough[data-ready=true]{border-color:#b99547;box-shadow:0 0 18px #bc963333,0 6px 24px #0003}
+.vu-ex-breakthrough[data-ready=true] .vu-ex-spirit-track span{background:linear-gradient(90deg,#ae822e,#ead091)}
+.vu-ex-breakthrough-detail{padding-top:4px}.vu-ex-breakthrough-detail p{margin:10px 0}.vu-ex-breakthrough-detail .vu-btn{width:100%;font-size:11px;white-space:normal}.vu-ex-breakthrough :focus-visible{outline:2px solid var(--vu-accent,#94712b);outline-offset:3px}
+@media(max-width:800px){.vu-ex-breakthrough{right:16px;top:16px;width:230px;max-height:45vh}}
+@media(prefers-reduced-motion:reduce){.vu-ex-spirit-track span{transition:none}}
+.vu-ex-breakthrough-flourish{position:absolute;inset:0;z-index:30;display:grid;place-items:center;pointer-events:none;overflow:hidden;animation:vu-ex-moment-fade 2.6s ease both;color:var(--vu-text,#302e29)}
+.vu-ex-breakthrough-halo{position:absolute;inset:-20%;background:radial-gradient(ellipse at center,#dcb56830 0%,#dcb56812 35%,transparent 65%);animation:vu-ex-moment-halo 2.6s ease-out both}
+.vu-ex-breakthrough-banner{position:relative;box-sizing:border-box;width:min(560px,88%);padding:24px 32px;text-align:center;background:var(--vu-surface,#faf5e9);border-block:1px solid #b99547;box-shadow:0 12px 70px #0005,0 0 45px #cda34733;animation:vu-ex-moment-arrive 2.6s cubic-bezier(.2,.7,.2,1) both}
+.vu-ex-breakthrough-banner:before,.vu-ex-breakthrough-banner:after{content:'';position:absolute;inset:7px;border-block:1px solid #b9954766;pointer-events:none}
+.vu-ex-breakthrough-banner small{display:block;font:11px 'Space Mono',monospace;letter-spacing:.2em;text-transform:uppercase;margin:9px 0}
+.vu-ex-breakthrough-banner strong{display:block;font:clamp(32px,5vw,58px)/1.2 'Young Serif',serif;font-weight:400;letter-spacing:-.025em}
+.vu-ex-breakthrough-banner span{display:block;font:13px 'Plus Jakarta Sans',sans-serif;margin-top:14px}
+.vu-ex-breakthrough-ornament{color:#b99547;font:18px 'Young Serif',serif;letter-spacing:.2em;margin-top:10px}
+@keyframes vu-ex-moment-fade{0%{opacity:0}14%,76%{opacity:1}100%{opacity:0}}
+@keyframes vu-ex-moment-arrive{0%{transform:translateY(18px) scale(.96)}20%,76%{transform:translateY(0) scale(1)}100%{transform:translateY(-8px) scale(1.01)}}
+@keyframes vu-ex-moment-halo{0%{transform:scale(.65);opacity:0}35%{opacity:1}100%{transform:scale(1.2);opacity:0}}
+@media(prefers-reduced-motion:reduce){.vu-ex-breakthrough-flourish,.vu-ex-breakthrough-banner,.vu-ex-breakthrough-halo{animation:none}.vu-ex-breakthrough-halo{display:none}}
+.vu-ex-text-regenerate{padding:8px 16px;border-top:1px solid var(--vu-border);color:var(--vu-text);font:12px/1.4 'Plus Jakarta Sans',sans-serif}.vu-ex-text-regenerate small{display:block;margin-top:4px}.vu-ex-text-regenerate button{font-size:11px}.vu-ex-text-regenerate p{margin:6px 0}
+.vu-ex-grief-compact{position:absolute;left:24px;top:24px;width:230px;padding:14px 16px;pointer-events:auto;border:1px solid var(--vu-border);border-radius:8px;background:var(--vu-surface);color:var(--vu-text);font:12px/1.45 'Plus Jakarta Sans',sans-serif;box-shadow:0 6px 24px #0002}
+.vu-ex-grief-compact h3,.vu-ex-grief-panel h3{font:18px 'Young Serif',serif;margin:0 0 10px}.vu-ex-grief-compact p{margin:5px 0}.vu-ex-grief-compact small{display:block;margin-top:7px}.vu-ex-grief-panel{padding:16px;margin-bottom:20px;border:1px solid var(--vu-border);border-radius:6px;background:var(--vu-recessed);color:var(--vu-text)}
+@media(max-width:650px){.vu-ex-grief-compact{top:120px;left:16px;width:180px;padding:10px;font-size:11px}.vu-ex-grief-compact h3{font-size:15px}}

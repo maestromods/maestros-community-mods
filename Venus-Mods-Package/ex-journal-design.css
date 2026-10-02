@@ -1,0 +1,52 @@
+/* Native Venus typography and palette; scoped to Journals. */
+.vu-ex-rename{padding:10px 16px;color:var(--vu-text);font:500 12px/1.5 var(--font-body);align-self:center;max-width:260px}
+.vu-ex-rename form{display:flex;flex-wrap:wrap;gap:8px}.vu-ex-rename label{display:flex;flex-direction:column;gap:5px;width:100%}
+.vu-ex-rename input{box-sizing:border-box;width:100%;padding:9px;border:1px solid var(--vu-border);border-radius:8px;background:var(--vu-surface);color:var(--vu-text);font:inherit}
+.vu-ex-rename button,.vu-ex-rename .vu-btn{font:700 12px var(--font-body);padding:8px 12px;border:1px solid var(--vu-border);border-radius:10px;background:var(--vu-surface);color:var(--vu-text);cursor:pointer}
+.vu-ex-journal-post-actions{margin-top:20px;padding-top:12px;border-top:1px dashed var(--vu-border);font:500 12px/1.6 var(--font-body)}
+.vu-ex-journal-post-actions>div[role=group]{margin-top:10px;padding:12px;border:1px solid var(--vu-border);border-radius:12px;background:var(--vu-recessed)}
+.vu-ex-journal-post-actions>div[role=group] button{padding:8px 12px;margin-right:8px;border:1px solid var(--vu-border);border-radius:9px;font:inherit}
+.vu-ex-twist-editor{max-width:560px;max-height:65vh;overflow:auto;padding:12px 24px;color:var(--vu-text);font:500 14px/1.6 var(--font-body);text-align:left}
+.vu-ex-twist-editor h2{font:400 28px var(--font-display)}
+.vu-ex-twist-editor label{display:flex;flex-direction:column;gap:8px}
+.vu-ex-twist-editor textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--vu-border);border-radius:12px;background:var(--vu-surface);color:var(--vu-text);font:inherit;resize:vertical}
+.vu-ex-twist-actions{display:flex;flex-wrap:wrap;gap:10px}.vu-ex-twist-actions .vu-btn{font:700 12px var(--font-body);padding:10px 14px}
+.vu-ex-journals{--ex-journal-bg:var(--vu-surface,#fff8ee);--ex-journal-ink:var(--vu-text,#302238);background:var(--ex-journal-bg);color:var(--ex-journal-ink);font-family:var(--font-body);padding:36px 30px 56px 54px;scrollbar-gutter:stable}
+[data-theme="night"] .vu-ex-journals{--ex-journal-bg:var(--vu-surface,#282332);--ex-journal-ink:var(--vu-text,#f7efff)}
+.vu-ex-journal-masthead{position:relative;padding:4px 70px 22px 0;margin-bottom:22px;border-bottom:2px solid var(--vu-border);min-height:96px}
+.vu-ex-journal-kicker{display:block;font:700 10px/1.6 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--vu-text-muted)}
+.vu-ex-journal-masthead h2{font:400 clamp(28px,3vw,40px)/1.15 var(--font-display);letter-spacing:-.035em;margin:9px 0 10px}
+.vu-ex-journal-masthead p{margin:0;font-size:13px;color:var(--vu-text-body)}
+.vu-ex-journal-seal{position:absolute;right:3px;top:18px;display:grid;place-items:center;width:54px;height:60px;border:2px solid var(--vu-border);border-radius:20px 20px 12px 12px;transform:rotate(7deg);background:var(--vu-tint);color:var(--vu-accent);box-shadow:3px 4px 0 var(--vu-recessed)}
+.vu-ex-journal-seal svg{width:29px;height:29px}
+.vu-ex-journal-controls{gap:8px;align-items:center}
+.vu-ex-journal-controls label{font:700 12px var(--font-mono)}
+.vu-ex-journals button,.vu-ex-journals select{cursor:pointer}
+.vu-ex-journal-controls button,.vu-ex-journal-controls select,.vu-ex-journal-reply-button,.vu-ex-journal-reply-form button{font:700 11px/1.5 var(--font-mono);border:1.5px solid var(--vu-border);border-radius:12px;padding:8px 11px;transition:background .15s,transform .15s}
+.vu-ex-journals button:hover:not(:disabled){background:var(--vu-tint);transform:translateY(-1px)}
+.vu-ex-journals button:disabled{cursor:default;opacity:.6}
+.vu-ex-journal-note{font-size:11px;line-height:1.6;opacity:1;color:var(--vu-text-muted)}
+.vu-ex-journal-post{position:relative;margin:26px 0;padding:25px;border:1.5px solid var(--vu-border);border-radius:26px 10px 26px 10px;background:var(--ex-journal-bg);box-shadow:4px 5px 0 var(--vu-recessed)}
+.vu-ex-journal-post::before{content:"";position:absolute;left:25px;top:-6px;width:55px;height:10px;border-radius:3px;background:var(--vu-tint);border:1px solid var(--vu-border);transform:rotate(-3deg)}
+.vu-ex-journal-byline{display:flex;align-items:center;gap:11px;margin-bottom:8px;font-size:14px}
+.vu-ex-journal-byline strong,.vu-ex-journal-byline>div>span{display:block}
+.vu-ex-journal-byline>div>span{font:400 10px/1.7 var(--font-mono);color:var(--vu-text-muted)}
+.vu-ex-journal-post>small{font:400 10px/1.6 var(--font-mono);color:var(--vu-text-muted)}
+.vu-ex-journal-post h3{font:400 27px/1.25 var(--font-display);letter-spacing:-.025em;margin:18px 0 10px}
+.vu-ex-journal-mood{display:inline-block;border-radius:30px;padding:5px 11px;margin:0 0 18px;background:var(--vu-tint);font:500 11px/1.5 var(--font-body);color:var(--vu-text)}
+.vu-ex-journal-text{font:400 14px/1.85 var(--font-body);color:var(--vu-text-body);overflow-wrap:anywhere}
+.vu-ex-journal-post h4{font:700 11px var(--font-mono);text-transform:uppercase;letter-spacing:.08em;margin:24px 0 14px;padding-top:18px;border-top:1px solid var(--vu-border)}
+.vu-ex-journal-comment{border:0;border-radius:14px;margin:10px 0;padding:13px;background:var(--vu-recessed);font-size:12px;line-height:1.7}
+.vu-ex-journal-comment strong{font:700 11px/1.7 var(--font-body)}
+.vu-ex-journal-reply{margin-left:18px;border-color:var(--vu-border)}
+.vu-ex-player-composer{background:var(--vu-recessed);border:1.5px dashed var(--vu-border);border-radius:16px;padding:15px 18px;margin-top:22px}
+.vu-ex-player-composer summary{font:700 12px var(--font-mono)}
+.vu-ex-player-composer label,.vu-ex-journal-reply-form label{font:500 12px var(--font-body)}
+.vu-ex-journal-reply-form{margin:12px 0}
+.vu-ex-journal-reply-form select{width:100%;max-width:100%;padding:8px;margin:6px 0;border:1px solid var(--vu-border);border-radius:8px;background:var(--ex-journal-bg);color:var(--ex-journal-ink);font:400 12px var(--font-body)}
+.vu-ex-journals :focus-visible{outline:3px solid var(--vu-accent);outline-offset:3px}
+.vu-ex-journals button,.vu-ex-journals select,.vu-ex-journals textarea,.vu-ex-journals input{background:var(--ex-journal-bg);color:var(--ex-journal-ink)}
+.vu-ex-journals .vu-ex-journal-controls button,.vu-ex-journals .vu-ex-journal-controls select,.vu-ex-journals .vu-ex-journal-reply-button{background:var(--vu-surface,#282332);color:var(--vu-text,#f7efff)}
+.vu-ex-journal-text{max-width:76ch}
+@media(max-width:800px){.vu-ex-journals{padding:28px 18px 42px 32px}.vu-ex-journal-post{padding:18px}.vu-ex-journal-masthead h2{font-size:29px}.vu-ex-journal-controls{align-items:stretch}.vu-ex-journal-controls select{max-width:190px}}
+@media(prefers-reduced-motion:reduce){.vu-ex-journals button{transition:none}.vu-ex-journals button:hover:not(:disabled){transform:none}}

@@ -1,0 +1,84 @@
+function exMemPayload(game,cast=[],query='') {
+  if(!game.playthroughId)return null;
+  const data=exMemRecords(game);
+  return {playthroughId:String(game.playthroughId),...data,cast:cast.map(c=>typeof c==='string'?c:c.charId).filter(Boolean),query:exMemText(query,4000)};
+}
+function exMemAttach(request,cast,query) {
+  const payload=exMemPayload(useGameStore.getState(),cast,query);
+  return payload?{...request,_exMemory:payload}:request;
+}
+function castScenePrompt(...args){return exMemAttach(exBaseMemoryCast(...args),args[0],args[4]);}
+function buildSoloPrompt(...args){return exMemAttach(exBaseMemorySolo(...args),[],args[0]);}
+function buildTextingPrompt(...args){return exMemAttach(exBaseMemoryTexting(...args),[args[0]],args[3]);}
+function buildSlotIntroPrompt(...args){return exMemAttach(exBaseMemoryIntro(...args),[],'');}
+function exMemFactSchema(keys) {
+  const text={type:'string'},who={type:'string',enum:['reader',...keys]},listWho={type:'array',items:who};
+  return {type:'array',items:{type:'object',additionalProperties:false,required:['subject','category','text','timeline','certainty','claimant','knownBy','public','evidence','supersedes'],properties:{subject:who,category:{type:'string',enum:['memory_restoration','role','promise','secret','relationship','other']},text,timeline:{type:'string',enum:['current','alternate','unspecified']},certainty:{type:'string',enum:['event','claim']},claimant:{type:'string',enum:['none','reader',...keys]},knownBy:listWho,public:{type:'boolean'},evidence:text,supersedes:{type:'array',items:text}}}};
+}
+function buildLedgerPrompt(cast,scene,state,reader,schedule) {
+  const base=exBaseMemoryLedger(cast,scene,state,reader,schedule),game=useGameStore.getState(),schema=base.schema.schema;
+  const keys=cast.map(c=>charKeyOf(c.firstName,c.lastName)),existing=exMemRecords(game).records.filter(r=>r.kind==='fact'&&exMemRelevant(r,cast.map(c=>c.charId))).slice(-80);
+  return {...base,schema:{...base.schema,schema:{...schema,properties:{...schema.properties,exStoryFacts:exMemFactSchema(keys)},required:[...schema.required,'exStoryFacts']}},user:base.user+'\n\nLASTING STORY FACTS\nReturn exStoryFacts, at most 8 NEW lasting developments from the scene, or [] when none. These are separate from affection memories. Preserve completed memory restoration, established roles, important promises, revealed secrets and explicit relationship changes. Do not restate routine affection, scenery or an existing unchanged fact. Never invent time travel. timeline identifies WHEN THE FACT APPLIES: a restoration completed now is current, a relationship in another timeline is alternate; ambiguous facts are unspecified. A character statement about the universe is a claim, not verified truth; set claimant. An observed completed event uses certainty event and claimant none. A promise is the fact a promise was made, not proof it will be fulfilled. knownBy contains ONLY reader/cast keys who actually witnessed or learned this fact; subjects do not automatically know. Use [] for narrator-only knowledge. public is false unless explicitly public in the scene. Quote 12–600 exact characters of scene evidence for each fact, no paraphrase. Do not certify an unfulfilled player action as successful. If a later explicit event changes an existing fact, put only that fact’s exact id in supersedes, matching its subject/category/timeline; keep claims separate. Player corrections may not be automatically superseded. Existing facts (ids use internal character identifiers; use character keys for new rows): '+JSON.stringify(existing.map(({id,subject,category,timeline,text,certainty,manual})=>({id,subject,name:game.characters[subject]?fullNameOf(game.characters[subject]):subject,category,timeline,text,certainty,manual}))) };
+}
+function exMemAcceptFacts(before,ledger,live) {
+  if(before.playthroughId!==live.playthroughId)return exMemStore(live.exStoryMemory);
+  const old=exMemStore(live.exStoryMemory),slot=before.date+':'+before.time;
+  const transcript=[...(before.sceneLog||[]),...(before.pendingLines||[]),...(before.currentSceneTranscript||[])].map(l=>l.text||'').join('\n');
+  const normalize=s=>s.replace(/\s+/g,' ').trim(),evidenceText=normalize(transcript);
+  const cast=new Set([...(before.cast||[]),...(loopState.closingCast||[]).map(c=>c.charId),'reader']);
+  const convert=k=>k==='reader'?'reader':before.charKeyToId?.[k];
+  const facts=old.facts.filter(f=>f.batch!==slot||f.manual),accepted=[];
+  for(const row of (Array.isArray(ledger?.exStoryFacts)?ledger.exStoryFacts:[]).slice(0,8)){
+    const subject=convert(row.subject),text=exMemText(row.text,800),evidence=exMemText(row.evidence,600),claimant=row.claimant==='none'?null:convert(row.claimant);
+    if(!cast.has(subject)||!text||evidence.length<12||!evidenceText.includes(normalize(evidence))||!['current','alternate','unspecified'].includes(row.timeline)||!['event','claim'].includes(row.certainty)||!['memory_restoration','role','promise','secret','relationship','other'].includes(row.category)||row.certainty==='claim'&&!cast.has(claimant))continue;
+    if(!Array.isArray(row.knownBy)||row.knownBy.some(k=>!cast.has(convert(k))))continue;
+    const id='fact:'+slot+':'+exMemHash(JSON.stringify([subject,row.category,row.timeline,text]));
+    if(accepted.some(f=>f.id===id))continue;
+    const supersedes=(Array.isArray(row.supersedes)?row.supersedes:[]).filter(id=>facts.some(f=>f.id===id&&!f.manual&&!old.edits[id]&&f.subject===subject&&f.category===row.category&&f.timeline===row.timeline&&f.certainty===row.certainty&&exMemSlot(f.date,f.time)<exMemSlot(before.date,before.time)));
+    accepted.push({id,batch:slot,subject,category:row.category,text,timeline:row.timeline,certainty:row.certainty,claimant,knownBy:[...new Set(row.knownBy.map(convert))],public:row.public===true,evidence,supersedes,date:before.date,time:before.time,source:transcript.slice(0,12000),manual:false});
+  }
+  return {...old,facts:[...facts,...accepted]};
+}
+function exMemSettle(before,ledger) {
+  const live=useGameStore.getState();if(before.playthroughId!==live.playthroughId)return;
+  useGameStore.setState({exStoryMemory:exMemAcceptFacts(before,ledger,live)});
+}
+async function exMemSaveChange(transform,expected) {
+  const before=useGameStore.getState();
+  if(before.playthroughId!==expected||before.busy||before.sceneEnding||manualSaveOffer()!=='open')throw Error('Wait for narration to finish before editing memories.');
+  const previous=before.exStoryMemory,next=transform(exMemStore(previous),before);
+  useGameStore.setState({exStoryMemory:next});
+  try {await exMemPersist(expected);}
+  catch(e){if(useGameStore.getState().playthroughId===expected&&useGameStore.getState().exStoryMemory===next)useGameStore.setState({exStoryMemory:previous});throw e;}
+}
+async function exMemPersist(expected) {
+  const draft=manualSaveDraft();if(!draft)throw Error('No safe save point is available yet.');
+  let completed=false;manualWriting=true;
+  try{await queueWrite(async()=>{
+    if(useGameStore.getState().playthroughId!==expected)throw Error('The active playthrough changed.');
+    const result=await window.api.saves.autosave(expected,draft);
+    if(!result.ok)throw Error(result.error?.message||'Could not save story memory.');
+    completed=true;
+  });if(!completed)throw Error('The active game changed before memory could be saved.');}
+  finally{manualWriting=false;}
+}
+function ExMemoryEditor({onBack,waiting}) {
+  const game=useGameStore(s=>s),[filter,setFilter]=reactExports.useState(''),[search,setSearch]=reactExports.useState(''),[draft,setDraft]=reactExports.useState(null),[status,setStatus]=reactExports.useState(''),[busy,setBusy]=reactExports.useState(false),[confirm,setConfirm]=reactExports.useState(null),[dbStatus,setDbStatus]=reactExports.useState('');
+  const h=jsxRuntimeExports.jsx,hs=jsxRuntimeExports.jsxs,data=exMemRecords(game),blocked=waiting||busy||game.busy||game.sceneEnding,playthrough=game.playthroughId;
+  const chars=Object.values(game.characters||{}).filter(c=>(game.chars||[]).includes(c.charId)),options=[['reader','The player'],...chars.map(c=>[c.charId,fullNameOf(c)])];
+  reactExports.useEffect(()=>{let active=true;const p=exMemPayload(game,filter?[filter]:[],'');if(p)window.api.exMemory.inspect(p).then(r=>{if(active)setDbStatus(r.ok?'SQLite ready · '+r.data.indexed+' indexed records':'SQLite unavailable; save-based recall still works. '+(r.error?.message||''));}).catch(()=>{if(active)setDbStatus('SQLite unavailable; save-based recall still works.');});return()=>{active=false;};},[playthrough,game.exStoryMemory,game.history,filter]);
+  async function change(fn,message){setBusy(true);setStatus('');try{await exMemSaveChange(fn,playthrough);setStatus(message);setDraft(null);setConfirm(null);}catch(e){setStatus(e.message||'Memory could not be saved.');}finally{setBusy(false);}}
+  function fresh(){setDraft({id:null,kind:'fact',subject:filter||'reader',text:'',timeline:'current',certainty:'event',claimant:null,category:'other',knownBy:['reader'],public:false});}
+  function save(){if(!draft?.text.trim())return;change((store,g)=>{
+    if(draft.kind==='encounter')return {...store,encounterEdits:{...store.encounterEdits,[draft.id]:{text:draft.text.trim()}}};
+    const value={...draft,text:draft.text.trim(),manual:true};
+    if(draft.id)return {...store,edits:{...store.edits,[draft.id]:value}};
+    return {...store,facts:[...store.facts,{...value,id:'manual:'+crypto.randomUUID(),date:g.date,time:g.time,evidence:'',source:'Player-added story fact',supersedes:[]}]};
+  },'Memory saved for this playthrough. It applies to the next generated response.');}
+  function remove(r){change(store=>r.kind==='encounter'?{...store,encounterEdits:{...store.encounterEdits,[r.id]:{hidden:true}}}:{...store,hidden:[...new Set([...store.hidden,r.id])]},'Removed from enhanced recall. Original scene history and affection memories remain unchanged.');}
+  const records=data.records.filter(r=>(!filter||r.subjects?.includes(filter)||r.knownBy?.includes(filter))&&(!search||r.text.toLowerCase().includes(search.toLowerCase()))).sort((a,b)=>exMemSlot(b.date,b.time)-exMemSlot(a.date,a.time));
+  const select=(label,value,onChange,items)=>hs('label',{children:[label,h('select',{'aria-label':label,value,onChange:e=>onChange(e.target.value),disabled:blocked,children:items.map(([value,label])=>h('option',{value,children:label},value))})]});
+  return hs('section',{className:'vu-ex-memory-editor',children:[hs('header',{children:[h('h2',{children:'Story memory'}),h('button',{type:'button',className:'vu-btn vu-btn--outline',onClick:onBack,disabled:busy,children:'Back'})]}),h('p',{children:'Lasting facts and past encounters help the cast remember. Corrections apply to this playthrough’s future narration; they do not change relationship scores or rewrite old scenes.'}),h('small',{role:'status',children:dbStatus}),hs('div',{className:'ex-memory-controls',children:[select('Character',filter,setFilter,[['','All characters'],...options]),hs('label',{children:['Search memories',h('input',{value:search,onChange:e=>setSearch(e.target.value),type:'search'})]}),h('button',{type:'button',className:'vu-btn vu-btn--outline',onClick:fresh,disabled:blocked,children:'Add fact'})]}),
+    draft&&hs('div',{className:'ex-memory-draft',children:[h('h3',{children:draft.kind==='encounter'?'Correct encounter recall':draft.id?'Edit fact':'New fact'}),hs('label',{children:['Memory',h('textarea',{'aria-label':'Memory',rows:4,maxLength:draft.kind==='encounter'?12000:800,value:draft.text,onChange:e=>setDraft({...draft,text:e.target.value}),disabled:blocked})]}),draft.kind==='fact'&&hs('div',{children:[select('About',draft.subject,v=>setDraft({...draft,subject:v}),options),select('Applies in',draft.timeline,v=>setDraft({...draft,timeline:v}),[['current','Current timeline'],['alternate','Alternate timeline'],['unspecified','Unspecified']]),select('Category',draft.category,v=>setDraft({...draft,category:v}),[['other','Other'],['memory_restoration','Memory restoration'],['role','Role'],['promise','Promise'],['secret','Secret'],['relationship','Relationship']]),select('Evidence type',draft.certainty,v=>setDraft({...draft,certainty:v,claimant:v==='claim'?(draft.claimant||draft.subject):null}),[['event','Established event'],['claim','Character claim']]),draft.certainty==='claim'&&select('Claim made by',draft.claimant||'reader',v=>setDraft({...draft,claimant:v}),options),hs('label',{className:'ex-memory-check',children:[h('input',{type:'checkbox',checked:!!draft.public,onChange:e=>setDraft({...draft,public:e.target.checked}),disabled:blocked}),'Public knowledge']}),h('p',{children:'Who knows this? Leave all unchecked for narrator-only knowledge.'}),h('div',{className:'ex-memory-knowers',children:options.map(([id,name])=>hs('label',{className:'ex-memory-check',children:[h('input',{type:'checkbox',checked:draft.knownBy.includes(id),disabled:blocked,onChange:e=>setDraft({...draft,knownBy:e.target.checked?[...draft.knownBy,id]:draft.knownBy.filter(x=>x!==id)})}),name]},id))})]}),hs('div',{className:'ex-memory-actions',children:[h('button',{type:'button',className:'vu-btn',onClick:save,disabled:blocked||!draft.text.trim(),children:'Save memory'}),h('button',{type:'button',className:'vu-btn vu-btn--outline',onClick:()=>setDraft(null),disabled:busy,children:'Cancel'})]})]}),
+    h('p',{role:'status','aria-live':'polite',children:status}),h('small',{children:records.length+' records · context is selected by character, recency and relevance; not every record is sent each time.'}),...records.slice(0,150).map(r=>hs('article',{className:'ex-memory-card',children:[h('h3',{children:(r.kind==='fact'?'Fact':'Encounter')+' · day '+r.date+(r.time?' · night':' · day')}),r.kind==='fact'&&h('small',{children:(data.names[r.subject]||r.subject)+' · '+r.timeline+' · '+(r.certainty==='claim'?'Claim by '+(data.names[r.claimant]||r.claimant):'Established event')+' · '+(r.public?'Public':'Known by: '+(r.knownBy.map(id=>data.names[id]||id).join(', ')||'Narrator only'))+(r.manual?' · Player correction':'')}),h('p',{className:'ex-memory-text',children:r.text}),hs('details',{children:[h('summary',{children:'Source'}),h('p',{className:'ex-memory-text',children:r.evidence||r.source||'Saved story memory'}),r.evidence&&h('small',{children:'Quoted from the completed scene.'})]}),hs('div',{className:'ex-memory-actions',children:[h('button',{type:'button',className:'vu-btn vu-btn--outline',disabled:blocked,onClick:()=>{setDraft({...r,knownBy:[...r.knownBy]});setConfirm(null);},children:'Edit'}),h('button',{type:'button',className:'vu-btn vu-btn--outline',disabled:blocked,onClick:()=>setConfirm(r.id),children:'Remove'})]}),confirm===r.id&&hs('div',{children:[h('p',{children:'Remove this from enhanced recall? Original history remains available to the base game.'}),h('button',{type:'button',className:'vu-btn',disabled:blocked,onClick:()=>remove(r),children:'Confirm removal'}),h('button',{type:'button',className:'vu-btn vu-btn--outline',onClick:()=>setConfirm(null),children:'Keep memory'})]})]},r.id)),records.length>150&&h('p',{children:'Showing the latest 150 matching records. Use search or a character filter for older memories.'}),!records.length&&h('p',{children:'No matching memories yet. Complete an encounter or add a fact.'})]});
+}
