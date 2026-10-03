@@ -11,11 +11,11 @@ function exPlotTwistContext(state) {
 function ExPlotTwistEditor({onBack,waiting}) {
   const current=useGameStore(s=>s.exPlotTwist||"");
   const [draft,setDraft]=reactExports.useState(current),[status,setStatus]=reactExports.useState(""),[busy,setBusy]=reactExports.useState(false);
-  const h=jsxRuntimeExports.jsx,hs=jsxRuntimeExports.jsxs;
+  const h=(type,props,key)=>jsxRuntimeExports.jsx(type==="button"?motion.button:type,type==="button"?{...gestures(!!props.disabled,lift,press),...props}:props,key),hs=jsxRuntimeExports.jsxs;
   async function apply(text){
     if(waiting||busy)return;
     setBusy(true);setStatus("");
-    try{exSetPlotTwist(text);setDraft(text.trim());await writeDecisionPoint();setStatus(text.trim()?"Plot twist applied. It will guide the next generated narration.":"Plot twist removed. Events already narrated remain part of the story.");}
+    try{exSetPlotTwist(text);setDraft(text.trim());await exPersistModState();setStatus(text.trim()?"Plot twist applied. It will guide the next generated narration.":"Plot twist removed. Events already narrated remain part of the story.");}
     catch(err){setStatus(err.message||"Could not save the twist. Please save your game manually.");}
     finally{setBusy(false);}
   }

@@ -2,7 +2,7 @@
 const EX_MEMORY_VERSION = 1;
 const EX_MEMORY_BUDGET = 18000;
 function exMemStore(value) {
-  return {version:EX_MEMORY_VERSION,facts:Array.isArray(value?.facts)?value.facts:[],edits:value?.edits&&typeof value.edits==='object'?value.edits:{},hidden:Array.isArray(value?.hidden)?value.hidden:[],encounterEdits:value?.encounterEdits&&typeof value.encounterEdits==='object'?value.encounterEdits:{}};
+  return {version:EX_MEMORY_VERSION,encounterSubjects:value?.encounterSubjects&&typeof value.encounterSubjects==='object'?value.encounterSubjects:{},facts:Array.isArray(value?.facts)?value.facts:[],edits:value?.edits&&typeof value.edits==='object'?value.edits:{},hidden:Array.isArray(value?.hidden)?value.hidden:[],encounterEdits:value?.encounterEdits&&typeof value.encounterEdits==='object'?value.encounterEdits:{}};
 }
 function exMemHash(text) {let h=2166136261;for(let i=0;i<text.length;i++){h^=text.charCodeAt(i);h=Math.imul(h,16777619);}return (h>>>0).toString(16);}
 function exMemText(value,max=6000){return typeof value==='string'?value.trim().slice(0,max):'';}
@@ -16,7 +16,11 @@ function exMemRecords(game) {
     const id='encounter:'+day+':'+time,edit=store.encounterEdits[id];if(edit?.hidden)continue;
     const text=exMemText(edit?.text??value,12000);if(!text)continue;
     // A name in a recap establishes relevance, NOT that this person witnessed every event.
-    const subjects=chars.filter(c=>{const full=names[c.charId];return full&&text.toLowerCase().includes(full.toLowerCase())||(game.charInfo?.[c.charId]?.memories||[]).some(m=>m.date===+day)&&new RegExp('\\b'+String(c.firstName).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(text);}).map(c=>c.charId);
+    const subjects=Array.isArray(store.encounterSubjects[id])?store.encounterSubjects[id]:chars.filter(c=>{
+      const full=names[c.charId],first=String(c.firstName||'').toLowerCase();
+      const words=text.toLowerCase().split(/[^\p{L}\p{N}_]+/u);
+      return full&&text.toLowerCase().includes(full.toLowerCase())||first&&chars.filter(x=>String(x.firstName||'').toLowerCase()===first).length===1&&words.includes(first);
+    }).map(c=>c.charId);
     records.push({id,kind:'encounter',date:+day,time:+time,text,subjects,knownBy:[],public:false,timeline:'unspecified',certainty:'historical_recap',source:edit?'Player-corrected recall; original history preserved':'Saved encounter summary'});
   }
   const hidden=new Set(store.hidden),facts=store.facts.map(f=>({...f,...store.edits[f.id]})).filter(f=>f&&typeof f.id==='string'&&!hidden.has(f.id)&&exMemSlot(f.date,f.time)<=now);
@@ -24,7 +28,7 @@ function exMemRecords(game) {
   for(const fact of facts){if(superseded.has(fact.id))continue;const text=exMemText(fact.text,800);if(!text)continue;records.push({...fact,kind:'fact',text,subjects:[fact.subject],knownBy:Array.isArray(fact.knownBy)?fact.knownBy:[],public:fact.public===true,source:exMemText(fact.source,12000)});}
   return {records,names:{reader:'The player',...names}};
 }
-function exMemRelevant(f,cast){return f.subject==='reader'||f.public||cast.includes(f.subject)||f.knownBy?.some(id=>cast.includes(id));}
+function exMemRelevant(f,cast){return f.subject==='reader'||f.knownBy?.includes('reader')||f.public||cast.includes(f.subject)||f.knownBy?.some(id=>cast.includes(id));}
 function exMemSelect(records,cast,query) {
   const words=exMemWords(query),seen=new Set(),selected=[];
   const score=r=>words.reduce((sum,w)=>sum+(r.text.toLowerCase().includes(w)?1:0),0);

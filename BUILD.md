@@ -1,9 +1,12 @@
-# Build and port notes
+# Build this preview
 
-Compile Setup.cs as a Windows GUI executable using .NET Framework csc.exe. Reference System.Windows.Forms.dll, System.Drawing.dll and System.IO.Compression.dll. Embed payload.zip as VenusModsPayload, Installer-background.png as CityLifePreview. Set Setup.cs PayloadHash to the SHA-256 of payload.zip before compiling. The ZIP must contain Venus-Mods-Package as its top-level folder.
+Requires Windows, Node.js for development checks, PowerShell, and the .NET Framework C# compiler used by build.ps1.
 
-Feature selection uses bits 1=Story/Social, 2=City Life, 4=Music/naming, 8=Meanwhile. All 15 nonempty combinations are supported. Run build.ps1 on Windows to create the installer and checksums in dist.
+The source payload is Venus-Mods-Package. Setup.cs is the Windows installer; build.ps1 embeds the payload and background image. Run build.ps1 from this directory after validating changes. The script refuses to overwrite an existing dist/payload.zip.
 
-For a new official game release, inspect renderer/main/preload changes, port each affected anchor/API, and test every feature combination, install/uninstall path using disposable copies. The installer pins the pristine 0.2.0 source hash independently of manifest.json to prevent accidentally releasing a patch against an already modded archive. Never regenerate that baseline from an active user installation. Do not bypass the hash check to force another version to accept a patch.
+Target game: Windows 0.3.0.
+Original archive SHA256: bf6d54c42d507d48415f5beb9a6950de5a216d307a6d4c42dc39e05e3c1ee72a
 
-Retain the legacy uninstall manifest and two-backup verification for compatibility. Keep previous release artifacts. Do not include private saves, API settings, SQLite playthrough databases or logs in distribution packages.
+manifest.json records patched-archive hashes for every supported selection. Any changes to injected code or bundled venue assets require regeneration of that manifest and repeat validation. A successful syntax check alone is insufficient. Keep the exact-one-anchor checks, staging, backup checks and version restrictions intact.
+
+Distribute the compiled setup and SHA256.txt, or the source tree without test game copies, data, logs, credentials, databases or saves. The source does not include the base game. Do not publish an extracted original game archive.

@@ -37,7 +37,7 @@ function exMemAcceptFacts(before,ledger,live) {
     const supersedes=(Array.isArray(row.supersedes)?row.supersedes:[]).filter(id=>facts.some(f=>f.id===id&&!f.manual&&!old.edits[id]&&f.subject===subject&&f.category===row.category&&f.timeline===row.timeline&&f.certainty===row.certainty&&exMemSlot(f.date,f.time)<exMemSlot(before.date,before.time)));
     accepted.push({id,batch:slot,subject,category:row.category,text,timeline:row.timeline,certainty:row.certainty,claimant,knownBy:[...new Set(row.knownBy.map(convert))],public:row.public===true,evidence,supersedes,date:before.date,time:before.time,source:transcript.slice(0,12000),manual:false});
   }
-  return {...old,facts:[...facts,...accepted]};
+  return {...old,encounterSubjects:{...old.encounterSubjects,['encounter:'+slot]:[...new Set([...(old.encounterSubjects['encounter:'+slot]||[]),...cast])].filter(id=>id!=='reader')},facts:[...facts,...accepted]};
 }
 function exMemSettle(before,ledger) {
   const live=useGameStore.getState();if(before.playthroughId!==live.playthroughId)return;
@@ -51,20 +51,10 @@ async function exMemSaveChange(transform,expected) {
   try {await exMemPersist(expected);}
   catch(e){if(useGameStore.getState().playthroughId===expected&&useGameStore.getState().exStoryMemory===next)useGameStore.setState({exStoryMemory:previous});throw e;}
 }
-async function exMemPersist(expected) {
-  const draft=manualSaveDraft();if(!draft)throw Error('No safe save point is available yet.');
-  let completed=false;manualWriting=true;
-  try{await queueWrite(async()=>{
-    if(useGameStore.getState().playthroughId!==expected)throw Error('The active playthrough changed.');
-    const result=await window.api.saves.autosave(expected,draft);
-    if(!result.ok)throw Error(result.error?.message||'Could not save story memory.');
-    completed=true;
-  });if(!completed)throw Error('The active game changed before memory could be saved.');}
-  finally{manualWriting=false;}
-}
+async function exMemPersist(expected){return exPersistModState(expected);}
 function ExMemoryEditor({onBack,waiting}) {
   const game=useGameStore(s=>s),[filter,setFilter]=reactExports.useState(''),[search,setSearch]=reactExports.useState(''),[draft,setDraft]=reactExports.useState(null),[status,setStatus]=reactExports.useState(''),[busy,setBusy]=reactExports.useState(false),[confirm,setConfirm]=reactExports.useState(null),[dbStatus,setDbStatus]=reactExports.useState('');
-  const h=jsxRuntimeExports.jsx,hs=jsxRuntimeExports.jsxs,data=exMemRecords(game),blocked=waiting||busy||game.busy||game.sceneEnding,playthrough=game.playthroughId;
+  const h=(type,props,key)=>jsxRuntimeExports.jsx(type==="button"?motion.button:type,type==="button"?{...gestures(!!props.disabled,lift,press),...props}:props,key),hs=jsxRuntimeExports.jsxs,data=exMemRecords(game),blocked=waiting||busy||game.busy||game.sceneEnding,playthrough=game.playthroughId;
   const chars=Object.values(game.characters||{}).filter(c=>(game.chars||[]).includes(c.charId)),options=[['reader','The player'],...chars.map(c=>[c.charId,fullNameOf(c)])];
   reactExports.useEffect(()=>{let active=true;const p=exMemPayload(game,filter?[filter]:[],'');if(p)window.api.exMemory.inspect(p).then(r=>{if(active)setDbStatus(r.ok?'SQLite ready · '+r.data.indexed+' indexed records':'SQLite unavailable; save-based recall still works. '+(r.error?.message||''));}).catch(()=>{if(active)setDbStatus('SQLite unavailable; save-based recall still works.');});return()=>{active=false;};},[playthrough,game.exStoryMemory,game.history,filter]);
   async function change(fn,message){setBusy(true);setStatus('');try{await exMemSaveChange(fn,playthrough);setStatus(message);setDraft(null);setConfirm(null);}catch(e){setStatus(e.message||'Memory could not be saved.');}finally{setBusy(false);}}

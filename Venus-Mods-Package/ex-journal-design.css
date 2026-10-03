@@ -1,16 +1,7 @@
 /* Native Venus typography and palette; scoped to Journals. */
-.vu-ex-rename{padding:10px 16px;color:var(--vu-text);font:500 12px/1.5 var(--font-body);align-self:center;max-width:260px}
-.vu-ex-rename form{display:flex;flex-wrap:wrap;gap:8px}.vu-ex-rename label{display:flex;flex-direction:column;gap:5px;width:100%}
-.vu-ex-rename input{box-sizing:border-box;width:100%;padding:9px;border:1px solid var(--vu-border);border-radius:8px;background:var(--vu-surface);color:var(--vu-text);font:inherit}
-.vu-ex-rename button,.vu-ex-rename .vu-btn{font:700 12px var(--font-body);padding:8px 12px;border:1px solid var(--vu-border);border-radius:10px;background:var(--vu-surface);color:var(--vu-text);cursor:pointer}
 .vu-ex-journal-post-actions{margin-top:20px;padding-top:12px;border-top:1px dashed var(--vu-border);font:500 12px/1.6 var(--font-body)}
 .vu-ex-journal-post-actions>div[role=group]{margin-top:10px;padding:12px;border:1px solid var(--vu-border);border-radius:12px;background:var(--vu-recessed)}
 .vu-ex-journal-post-actions>div[role=group] button{padding:8px 12px;margin-right:8px;border:1px solid var(--vu-border);border-radius:9px;font:inherit}
-.vu-ex-twist-editor{max-width:560px;max-height:65vh;overflow:auto;padding:12px 24px;color:var(--vu-text);font:500 14px/1.6 var(--font-body);text-align:left}
-.vu-ex-twist-editor h2{font:400 28px var(--font-display)}
-.vu-ex-twist-editor label{display:flex;flex-direction:column;gap:8px}
-.vu-ex-twist-editor textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--vu-border);border-radius:12px;background:var(--vu-surface);color:var(--vu-text);font:inherit;resize:vertical}
-.vu-ex-twist-actions{display:flex;flex-wrap:wrap;gap:10px}.vu-ex-twist-actions .vu-btn{font:700 12px var(--font-body);padding:10px 14px}
 .vu-ex-journals{--ex-journal-bg:var(--vu-surface,#fff8ee);--ex-journal-ink:var(--vu-text,#302238);background:var(--ex-journal-bg);color:var(--ex-journal-ink);font-family:var(--font-body);padding:36px 30px 56px 54px;scrollbar-gutter:stable}
 [data-theme="night"] .vu-ex-journals{--ex-journal-bg:var(--vu-surface,#282332);--ex-journal-ink:var(--vu-text,#f7efff)}
 .vu-ex-journal-masthead{position:relative;padding:4px 70px 22px 0;margin-bottom:22px;border-bottom:2px solid var(--vu-border);min-height:96px}

@@ -112,6 +112,7 @@ function ExJournals() {
     task.current=ticket; setBusy(true);setStatus("");
     const alive=()=>!ticket.cancelled && useGameStore.getState().loads===ticket.loads && useGameStore.getState().playthroughId===ticket.playthroughId;
     const commit=post=>{if(alive()&&!useGameStore.getState().exDeletedJournals?.[post.key])useGameStore.setState(s=>({exJournals:{...s.exJournals,[post.key]:{...post,comments:exMergeJournalComments(post.comments,s.exJournals?.[post.key]?.comments)}}}));};
+    const heldLocks=[];
     const call=async request=>{
       const result=await window.api.llm.completeEndingPosts(request,ticket.group);
       if(!alive())return null;
@@ -126,6 +127,9 @@ function ExJournals() {
         if(useGameStore.getState().exDeletedJournals?.[key])continue;
         let post=regenerate?null:useGameStore.getState().exJournals?.[key];
         if(post?.commentsReady)continue;
+        const lock=game.playthroughId+":"+game.loads+":"+key;
+        if(exPlayerPostRequests.has(lock))continue;
+        exPlayerPostRequests.set(lock,ticket);heldLocks.push(lock);
         setStatus("Reading "+person.persona.firstName+"'s journal…");
         if(!post){
           const raw=await call(exJournalPostRequest(night,id));if(!raw)break;
@@ -138,9 +142,9 @@ function ExJournals() {
         } else post={...post,commentsReady:true};
         commit(post);
       }
-      if(alive()){await writeDecisionPoint();setStatus("Journal entries stay with this save. Save your game to keep them.");}
+      if(alive()){await exPersistModState();setStatus("Journal entries stay with this save. Save your game to keep them.");}
     }catch(err){if(alive())setStatus(err.message || "Couldn't load this journal. Try again; completed posts are kept.");}
-    finally {if(task.current===ticket){task.current=null;setBusy(false);}}
+    finally {for(const lock of heldLocks)if(exPlayerPostRequests.get(lock)===ticket)exPlayerPostRequests.delete(lock);if(task.current===ticket){task.current=null;setBusy(false);}}
   }
   return hs("section",{className:"vu-ex-journals","aria-label":"Public journals",children:[
     hs("header",{className:"vu-ex-journal-masthead",children:[h("span",{className:"vu-ex-journal-kicker",children:"Bunnyboard / Campus life"}),h("h2",{children:"Campus journals"}),h("p",{children:"Little posts. Late thoughts. Familiar faces."}),h("span",{className:"vu-ex-journal-seal","aria-hidden":true,children:h(ExJournalsIcon,{})})]}),

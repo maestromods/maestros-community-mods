@@ -22,7 +22,3 @@
 @keyframes vu-ex-moment-arrive{0%{transform:translateY(18px) scale(.96)}20%,76%{transform:translateY(0) scale(1)}100%{transform:translateY(-8px) scale(1.01)}}
 @keyframes vu-ex-moment-halo{0%{transform:scale(.65);opacity:0}35%{opacity:1}100%{transform:scale(1.2);opacity:0}}
 @media(prefers-reduced-motion:reduce){.vu-ex-breakthrough-flourish,.vu-ex-breakthrough-banner,.vu-ex-breakthrough-halo{animation:none}.vu-ex-breakthrough-halo{display:none}}
-.vu-ex-text-regenerate{padding:8px 16px;border-top:1px solid var(--vu-border);color:var(--vu-text);font:12px/1.4 'Plus Jakarta Sans',sans-serif}.vu-ex-text-regenerate small{display:block;margin-top:4px}.vu-ex-text-regenerate button{font-size:11px}.vu-ex-text-regenerate p{margin:6px 0}
-.vu-ex-grief-compact{position:absolute;left:24px;top:24px;width:230px;padding:14px 16px;pointer-events:auto;border:1px solid var(--vu-border);border-radius:8px;background:var(--vu-surface);color:var(--vu-text);font:12px/1.45 'Plus Jakarta Sans',sans-serif;box-shadow:0 6px 24px #0002}
-.vu-ex-grief-compact h3,.vu-ex-grief-panel h3{font:18px 'Young Serif',serif;margin:0 0 10px}.vu-ex-grief-compact p{margin:5px 0}.vu-ex-grief-compact small{display:block;margin-top:7px}.vu-ex-grief-panel{padding:16px;margin-bottom:20px;border:1px solid var(--vu-border);border-radius:6px;background:var(--vu-recessed);color:var(--vu-text)}
-@media(max-width:650px){.vu-ex-grief-compact{top:120px;left:16px;width:180px;padding:10px;font-size:11px}.vu-ex-grief-compact h3{font-size:15px}}

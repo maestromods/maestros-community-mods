@@ -12,7 +12,7 @@ function buildTextingPrompt(character, info, conversation, newMessage, state, re
     'PHONE / SCENE CONTINUITY',
     'Use the same established character and relationship as face-to-face scenes. Casual texting changes the presentation, not her knowledge, commitments or personality. Do not reflexively act coy or distant when recent events established trust. Do not repeat a revelation she already learned.',
     'Old chat summaries describe past exchanges, not her permanent current attitude. Respect more recent witnessed events. Story direction is author context, not information every character knows: keep secrets private unless this character witnessed or was told them.',
-    ...exPlotTwistContext(game),exBreakthroughContinuity(game,[character]),
+    ...(typeof exPlotTwistContext==='function'?exPlotTwistContext(game):[]),(typeof exBreakthroughContinuity==='function'?exBreakthroughContinuity(game,[character]):''),
     recent.length?'RECENT SCENE REFERENCES (use only what she personally witnessed or learned, not narrator-only secrets): '+JSON.stringify(recent):''
   ].filter(Boolean).join('\n');
   return {...request,system:request.system.replace('You make the women play hard to get; everything is a slow burn.','Let the pace and warmth follow this character’s established relationship and recent interactions; do not automatically play hard to get.'),user:request.user+'\n\n'+extra};
@@ -67,7 +67,7 @@ async function exRegenerateText(id) {
     const live=useGameStore.getState().bunnyboard.conversations[id];
     const next={...live,messages:[...target.conversation.messages.slice(0,target.index+1),...lines.map(text=>({...chatMessage('contact',text.trim()),exReplyTo:target.sent.id}))],summary:data.summary.trim()};
     useGameStore.setState(s=>({...s,bunnyboard:{...s.bunnyboard,conversations:{...s.bunnyboard.conversations,[id]:next}}}));
-    try{await writeDecisionPoint();}catch{throw Error('The whole reply was replaced, but autosave failed. Save your game manually.');}
+    try{await exPersistModState();}catch{throw Error('The whole reply was replaced, but autosave failed. Save your game manually.');}
     return {replaced:target.replies.length,created:lines.length};
   } finally {
     if(inFlight.get(id)===token){inFlight.delete(id);useBunnyboardStore.getState().setTextBusy(id,false);}

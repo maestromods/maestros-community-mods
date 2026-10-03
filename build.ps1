@@ -1,7 +1,7 @@
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 $root = $PSScriptRoot
-$dist = Join-Path $root 'dist'
+$dist = Join-Path $root 'dist-final'
 New-Item -ItemType Directory -Path $dist -Force | Out-Null
 $payload = Join-Path $dist 'payload.zip'
 if (Test-Path -LiteralPath $payload) { throw 'dist/payload.zip already exists. Move the previous dist output aside before rebuilding.' }
@@ -19,8 +19,8 @@ $generated = Join-Path $dist 'Setup.generated.cs'
 [IO.File]::WriteAllText($generated, $source)
 $compiler = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
 if (!(Test-Path -LiteralPath $compiler)) { throw '.NET Framework C# compiler was not found.' }
-$exe = Join-Path $dist 'Maestro-Community-Mods-Setup-1.1.3.exe'
-& $compiler /nologo /target:winexe "/out:$exe" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll "/resource:$payload,VenusModsPayload" "/resource:$(Join-Path $root 'Installer-background.png'),CityLifePreview" $generated
+$exe = Join-Path $dist 'Maestro-Community-Mods-Setup-1.7.1.exe'
+& $compiler /nologo /target:winexe "/out:$exe" /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.IO.Compression.dll "/resource:$payload,VenusModsPayload" $generated
 if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed.' }
 @($exe, $payload) | ForEach-Object { $item = Get-FileHash -LiteralPath $_ -Algorithm SHA256; "$($item.Hash.ToLowerInvariant())  $([IO.Path]::GetFileName($_))" } | Set-Content -LiteralPath (Join-Path $dist 'SHA256.txt')
 Write-Host "Built installer in $dist"

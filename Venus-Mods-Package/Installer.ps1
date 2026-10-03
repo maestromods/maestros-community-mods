@@ -1,4 +1,4 @@
-﻿param([switch]$UseGameRuntime,[string]$LayoutTestPath,[switch]$SelfTest,[string]$GameFolder,[ValidateSet('check','install','uninstall')][string]$Action='check',[int]$Selection=15)
+param([switch]$UseGameRuntime,[string]$LayoutTestPath,[switch]$SelfTest,[string]$GameFolder,[ValidateSet('check','install','uninstall')][string]$Action='check',[int]$Selection=767)
 $ErrorActionPreference='Stop'
 $installerRoot=$PSScriptRoot
 function New-CityProcess([string]$SelectedFolder,[string]$SelectedAction) {
@@ -6,7 +6,7 @@ function New-CityProcess([string]$SelectedFolder,[string]$SelectedAction) {
     if (-not (Test-Path -LiteralPath (Join-Path $resolved 'resources\app.asar') -PathType Leaf)) { throw 'Choose the game folder containing resources and Venus University.exe.' }
     $nodeCommand=if ($UseGameRuntime) { $null } else { Get-Command node.exe -ErrorAction SilentlyContinue }
     $runtimePath=if ($nodeCommand) { $nodeCommand.Source } else { Join-Path $resolved 'Venus University.exe' }
-    if (-not (Test-Path -LiteralPath $runtimePath -PathType Leaf)) { throw 'The base game executable was not found. Choose the Windows 0.2.0 game folder.' }
+    if (-not (Test-Path -LiteralPath $runtimePath -PathType Leaf)) { throw 'The base game executable was not found. Choose the Windows 0.3.0 game folder.' }
     $scriptPath=Join-Path $installerRoot 'install.cjs'
     foreach ($value in @($scriptPath,$resolved)) { if ($value.Contains('"')) { throw 'The selected path contains unsupported quotes.' } }
     $info=New-Object System.Diagnostics.ProcessStartInfo
@@ -36,3 +36,4 @@ if ($SelfTest) {
     if ($probe.ExitCode -ne 0) { throw $errors }
     exit 0
 }
+

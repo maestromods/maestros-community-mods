@@ -1,13 +1,10 @@
 .ex-local-music{grid-column:1/-1;box-sizing:border-box;padding:18px;margin:12px 0;border:1px solid currentColor;border-radius:14px;background:color-mix(in srgb,currentColor 4%,transparent);font:inherit}.ex-local-music h3{margin:0 0 8px;font:inherit;font-weight:700}.ex-local-music p{margin:8px 0;font-size:14px;line-height:1.45}.ex-local-music label{display:flex;gap:12px;align-items:center;margin:12px 0}.ex-local-music select{font:inherit;padding:8px;border:1px solid currentColor;border-radius:8px;color:var(--vu-text,#302238);background:var(--vu-surface,#fff8ee)}.ex-local-music .ex-music-file{font-weight:600;overflow-wrap:anywhere}.ex-music-actions{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}.ex-local-music small{display:block;font-size:12px;line-height:1.5}.ex-local-music button:disabled{opacity:.55}.ex-local-music :focus-visible{outline:3px solid #ac81bd;outline-offset:3px}
 
-/* The native right column was sized for stock controls only. Keep the paper
-   and its title unclipped; scroll the controls inside that column instead. */
-.vu-settings:not(.vu-settings--content) > .vu-settings-content{overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;overscroll-behavior:contain;padding:4px 12px 14px 4px;scroll-padding-block:14px}
-.vu-settings:not(.vu-settings--content) > .vu-settings-content > *{flex-shrink:0}
-
-/* Extend the scroll gutter into the panel's existing right padding rather than
-   squeezing the controls. Long backup labels wrap before reaching the rail. */
-.vu-settings:not(.vu-settings--content) > .vu-settings-content{width:458px;margin-right:-28px;padding-right:28px}
-.vu-settings:not(.vu-settings--content) .vu-settings-data-actions{flex-wrap:wrap}
-.vu-settings:not(.vu-settings--content) .vu-settings-data-actions > button{flex:1 1 170px;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
-.vu-settings:not(.vu-settings--content) .vu-settings-content .vu-foot{flex-wrap:wrap}
+/* 0.3.0 nests both columns inside .vu-settings-columns and keeps a shared
+   footer below them. Scroll only the right column, preserving the paper/tab. */
+.vu-settings--split > .vu-settings-columns > .vu-settings-content{box-sizing:border-box;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;overscroll-behavior:contain;width:458px;margin-right:-28px;padding:4px 28px 16px 4px;scroll-padding-block:16px}
+.vu-settings--split > .vu-settings-columns > .vu-settings-content > *{flex-shrink:0}
+.vu-settings--split > .vu-foot-stack{flex-shrink:0}
+.vu-settings--split .vu-settings-data-actions{flex-wrap:wrap}
+.vu-settings--split .vu-settings-data-actions > button{flex:1 1 170px;min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere}
+.ex-local-music select{min-width:0;max-width:100%}

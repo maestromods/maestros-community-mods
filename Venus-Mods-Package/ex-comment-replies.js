@@ -16,14 +16,14 @@ async function exRegenerateJournalComments(key) {
     if(!result.ok)throw Error(result.error?.message||"Could not regenerate comments. Existing comments were kept.");
     const comments=exValidatePlayerComments(result.data,input);
     useGameStore.setState(s=>({exJournals:{...s.exJournals,[key]:{...s.exJournals[key],comments:exMergeJournalComments(comments,s.exJournals[key].comments),commentsReady:true}}}));
-    await writeDecisionPoint();
+    await exPersistModState();
   }finally{exPlayerPostRequests.delete(lock);}
 }
 function ExJournalPostActions({post}) {
   const [confirm,setConfirm]=reactExports.useState(false),[busy,setBusy]=reactExports.useState(false),[status,setStatus]=reactExports.useState("");
   const h=jsxRuntimeExports.jsx,hs=jsxRuntimeExports.jsxs;
   async function regenerate(){if(busy)return;setBusy(true);setStatus("");try{await exRegenerateJournalComments(post.key);setStatus("NPC comments refreshed. Your conversations were preserved.");}catch(err){setStatus(err.message);}finally{setBusy(false);}}
-  async function remove(){if(busy)return;exDeleteJournalPost(post.key);await writeDecisionPoint();}
+  async function remove(){if(busy)return;exDeleteJournalPost(post.key);await exPersistModState();}
   return hs("div",{className:"vu-ex-journal-post-actions",children:[hs("div",{className:"vu-ex-journal-controls",children:[h("button",{type:"button",disabled:busy,onClick:regenerate,children:busy?"Regenerating…":"Regenerate NPC comments"}),h("button",{type:"button",disabled:busy,onClick:()=>setConfirm(!confirm),children:"Delete post"})]}),confirm&&hs("div",{role:"group","aria-label":"Confirm post deletion",children:[h("p",{children:"Delete this post and all its comments from this save? Existing narrated events will remain."}),h("button",{type:"button",onClick:()=>void remove().catch(err=>setStatus(err.message)),children:"Yes, delete post"}),h("button",{type:"button",onClick:()=>setConfirm(false),children:"Cancel"})]}),h("p",{role:"status",children:status})]});
 }
 function exJournalNarration(cast,state) {
@@ -87,7 +87,7 @@ function ExCommentReplyComposer({postKey,commentIndex}) {
   const [open,setOpen]=reactExports.useState(false),[text,setText]=reactExports.useState(""),[status,setStatus]=reactExports.useState("");
   async function submit(event){
     event.preventDefault();setStatus("");
-    try{const origin=useGameStore.getState();const reply=exCommentReply(postKey,commentIndex,text);setText("");setOpen(false);await writeDecisionPoint();const current=useGameStore.getState();if(current.loads===origin.loads&&current.playthroughId===origin.playthroughId)void exRequestThreadReply(postKey,reply.id).catch(()=>{});}
+    try{const origin=useGameStore.getState();const reply=exCommentReply(postKey,commentIndex,text);setText("");setOpen(false);await exPersistModState();const current=useGameStore.getState();if(current.loads===origin.loads&&current.playthroughId===origin.playthroughId)void exRequestThreadReply(postKey,reply.id).catch(()=>{});}
     catch(err){setStatus(err.message||"Couldn't post that reply.");}
   }
   if(!open)return jsxRuntimeExports.jsx("button",{className:"vu-ex-journal-reply-button",type:"button",onClick:()=>setOpen(true),children:commentIndex==null?"Comment on this post":"Reply"});
@@ -162,7 +162,7 @@ async function exRequestThreadReply(postKey,messageId) {
     await exReplyPause(1500,4000);if(!alive())return;
     const c=game.characters[recipient];
     commit({responseReady:true,responsePending:false,responseError:""},{id:crypto.randomUUID(),charId:recipient,author:[c.firstName,c.lastName].filter(Boolean).join(" "),handle:game.charInfo[recipient]?.handle||c.firstName,text:text.trim(),createdAt:Date.now(),replyTo:messageId,playerReply:false});
-    await writeDecisionPoint();
+    await exPersistModState();
     if(!alive())return;
     const guest=exChimeCandidate(game,recipient);
     if(guest){
@@ -181,9 +181,9 @@ async function exRequestThreadReply(postKey,messageId) {
           commit({responsePending:false},{id:crypto.randomUUID(),charId:guest,author:[person.firstName,person.lastName].filter(Boolean).join(" "),handle:game.charInfo[guest]?.handle||person.firstName,text:bonus.data.text.trim(),createdAt:Date.now(),replyTo:messageId,playerReply:false,chimeIn:true});
         }
       }catch(err){/* An optional reader failing to respond does not undo the main reply. */}
-      finally{commit({responsePending:false,responseStage:null});if(alive())await writeDecisionPoint();}
+      finally{commit({responsePending:false,responseStage:null});if(alive())await exPersistModState();}
     }
-  } catch(err){commit({responsePending:false,responseError:err.message||"Couldn't load the reply."});if(alive())await writeDecisionPoint();}
+  } catch(err){commit({responsePending:false,responseError:err.message||"Couldn't load the reply."});if(alive())await exPersistModState();}
   finally {exThreadRequests.delete(lock);}
 }
 function ExThreadResponseStatus({postKey,message}) {

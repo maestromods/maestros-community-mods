@@ -1,0 +1,5 @@
+.vu-ex-twist-editor{max-width:560px;max-height:65vh;overflow:auto;padding:12px 24px;color:var(--vu-text);font:500 14px/1.6 var(--font-body);text-align:left}
+.vu-ex-twist-editor h2{font:400 28px var(--font-display)}
+.vu-ex-twist-editor label{display:flex;flex-direction:column;gap:8px}
+.vu-ex-twist-editor textarea{box-sizing:border-box;width:100%;padding:12px;border:1px solid var(--vu-border);border-radius:12px;background:var(--vu-surface);color:var(--vu-text);font:inherit;resize:vertical}
+.vu-ex-twist-actions{display:flex;flex-wrap:wrap;gap:10px}.vu-ex-twist-actions .vu-btn{font:700 12px var(--font-body);padding:10px 14px}

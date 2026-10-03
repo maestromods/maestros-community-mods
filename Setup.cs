@@ -13,7 +13,7 @@ namespace VenusModsSetup {
 static class Program {
  public const string PayloadHash="36d0b741da1e521233fde008fac5c9f1833b505f7667bcf2387fd5ac3325d97c";
  public static string PackageRoot(string directory){return Path.Combine(directory,"Venus-Mods-Package");}
- public static string Home {get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs","Maestro Community Mods","1.1.3");}}
+ public static string Home {get{return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs","Maestro Community Mods","1.7.1");}}
  public static string Hash(byte[] bytes){using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(bytes)).Replace("-","").ToLowerInvariant();}
  public static void Extract(string directory){
   byte[] bytes;using(var input=Assembly.GetExecutingAssembly().GetManifestResourceStream("VenusModsPayload")){if(input==null)throw new Exception("Missing embedded package.");using(var memory=new MemoryStream()){input.CopyTo(memory);bytes=memory.ToArray();}}
@@ -49,9 +49,8 @@ static class Program {
 sealed class Wizard:Form {
  Panel body=new Panel();Button next=new Button(),back=new Button(),cancel=new Button();TextBox folder=new TextBox(),log=new TextBox();Button browse=new Button(),check=new Button();CheckBox shortcut=new CheckBox();int page=0;bool working=false,installed=false;Label title=new Label();
  Color plum=Color.FromArgb(43,28,47),rose=Color.FromArgb(224,165,189),ink=Color.FromArgb(69,42,60),paper=Color.FromArgb(252,246,237);
- Label step=new Label();Image artwork;CheckBox[] choices=new CheckBox[4];Button remove=new Button();int Selection{get{int result=0;for(int i=0;i<4;i++)if(choices[i].Checked)result|=1<<i;return result;}}
- public Wizard(){Text="Maestro's Community Mods 1.1.3";ClientSize=new Size(900,620);FormBorderStyle=FormBorderStyle.FixedSingle;MaximizeBox=false;StartPosition=FormStartPosition.CenterScreen;AutoScaleMode=AutoScaleMode.None;Font=new Font("Segoe UI",10.5f);BackColor=paper;ForeColor=ink;
- using(var input=Assembly.GetExecutingAssembly().GetManifestResourceStream("CityLifePreview"))using(var original=Image.FromStream(input)){artwork=new Bitmap(original);}
+ Label step=new Label();CheckBox[] choices=new CheckBox[9];Button remove=new Button();int Selection{get{int result=0;for(int i=0;i<9;i++)if(choices[i].Checked)result|=1<<(i==8?9:i);return result;}}
+ public Wizard(){Text="Maestro's Community Mods 1.7.1";ClientSize=new Size(900,620);FormBorderStyle=FormBorderStyle.FixedSingle;MaximizeBox=false;StartPosition=FormStartPosition.CenterScreen;AutoScaleMode=AutoScaleMode.None;Font=new Font("Segoe UI",10.5f);BackColor=paper;ForeColor=ink;
  var banner=new Panel();banner.SetBounds(0,0,900,130);banner.BackColor=plum;Controls.Add(banner);
  var brand=new Label();brand.Text="MAESTRO'S COMMUNITY MODS";brand.Font=new Font("Segoe UI",9,FontStyle.Bold);brand.ForeColor=rose;brand.SetBounds(32,18,650,24);banner.Controls.Add(brand);
  title.SetBounds(30,46,820,55);title.Font=new Font("Georgia",29,FontStyle.Bold);title.ForeColor=paper;banner.Controls.Add(title);
@@ -61,19 +60,22 @@ sealed class Wizard:Form {
  var note=new Label();note.Text="Mod issues: contact the mod maintainer, not the game author.";note.Font=new Font("Segoe UI",8,FontStyle.Bold);note.ForeColor=ink;note.SetBounds(32,8,475,20);footer.Controls.Add(note);var support=new LinkLabel();support.Text="Support the official release on Ko-fi";support.Font=new Font("Segoe UI",9,FontStyle.Bold);support.LinkColor=Color.FromArgb(151,48,83);support.ActiveLinkColor=Color.FromArgb(105,30,60);support.VisitedLinkColor=support.LinkColor;support.SetBounds(32,32,460,24);support.LinkClicked+=(o,e)=>{try{Process.Start(new ProcessStartInfo("https://ko-fi.com/venusdev"){UseShellExecute=true});}catch{MessageBox.Show("Visit https://ko-fi.com/venusdev to support the official release.","Support the developer");}};footer.Controls.Add(support);
  back.Text="Back";back.SetBounds(523,16,95,36);next.SetBounds(629,16,116,36);cancel.Text="Cancel";cancel.SetBounds(756,16,112,36);footer.Controls.Add(back);footer.Controls.Add(next);footer.Controls.Add(cancel);
  remove.Text="Uninstall mods";StyleButton(remove,false);remove.Click+=async(o,e)=>await Operation("uninstall");StyleButton(back,false);StyleButton(next,true);StyleButton(cancel,false);StyleButton(browse,false);StyleButton(check,false);
- back.Click+=(o,e)=>{page=0;Render();};next.Click+=Next;cancel.Click+=(o,e)=>Close();FormClosing+=(o,e)=>{if(working)e.Cancel=true;};FormClosed+=(o,e)=>{artwork.Dispose();};Render();
+ back.Click+=(o,e)=>{page=0;Render();};next.Click+=Next;cancel.Click+=(o,e)=>Close();FormClosing+=(o,e)=>{if(working)e.Cancel=true;};Render();
  }
+ void SyncDependencies(){if(choices[1]==null||choices[5]==null)return;if(!choices[1].Checked)choices[5].Checked=false;choices[5].Enabled=choices[1].Checked;}
  void StyleButton(Button button,bool primary){button.FlatStyle=FlatStyle.Flat;button.FlatAppearance.BorderSize=primary?0:1;button.FlatAppearance.BorderColor=Color.FromArgb(191,157,173);button.BackColor=primary?Color.FromArgb(151,48,83):paper;button.ForeColor=primary?Color.White:ink;button.Font=new Font("Segoe UI",10,FontStyle.Bold);button.Cursor=Cursors.Hand;button.FlatAppearance.MouseOverBackColor=primary?Color.FromArgb(175,63,101):Color.FromArgb(237,218,222);}
  Label Label(string text,int y,int height){var label=new Label();label.UseMnemonic=false;label.Text=text;label.SetBounds(0,y,836,height);body.Controls.Add(label);return label;}
  void Render(){body.Controls.Clear();back.Enabled=page==1&&!working;cancel.Text=installed?"Close":"Cancel";
  if(page==0){title.Text="Your story. Your mods.";step.Text="01  /  WELCOME";
- var heading=Label("Make it your kind of game.",0,45);heading.Font=new Font("Georgia",17,FontStyle.Bold);heading.Width=360;
- string[] names={"Story && Social","City Life","Music && playthrough names","Meanwhile conversations"};string[] details={"Journals, posts, ex/dislike setup, stat detriments,\r\nplot twists, Breakthrough, texts and SQLite recall.","Three venues, backgrounds and player/NPC jobs.","Replace and loop tracks; rename playthroughs.","Watch two NPCs talk in a read-only scene."};
- for(int i=0;i<4;i++){if(choices[i]==null){choices[i]=new CheckBox();choices[i].Checked=true;}var c=choices[i];c.Text=names[i];c.Font=new Font("Segoe UI",11,FontStyle.Bold);c.SetBounds(0,52+i*70,360,26);body.Controls.Add(c);var description=Label(details[i],80+i*70,39);description.Width=365;description.Font=new Font("Segoe UI",8.5f);}
- var requirement=Label("Choose any combination. You can uninstall later.",350,25);requirement.Font=new Font("Segoe UI",9);requirement.Width=370;
- var image=new PictureBox();image.SetBounds(379,0,457,300);image.SizeMode=PictureBoxSizeMode.Zoom;image.BackColor=plum;image.Image=artwork;body.Controls.Add(image);
- var caption=Label("An afternoon at Purr & Pour",305,35);caption.SetBounds(379,310,457,40);caption.Font=new Font("Georgia",14,FontStyle.Italic);
- next.Text="Let's begin";
+ var heading=Label("Make it your kind of game.",0,45);heading.Font=new Font("Georgia",17,FontStyle.Bold);heading.Width=630;
+ string[] names={"Story && Social core","City Life locations","Custom soundtrack","Meanwhile conversations","Playthrough renaming","City Life jobs","Starting relationships","Plot Twist","Breakthrough"};
+ string[] details={"Journals, text regeneration and SQLite memory.","Bowling, roller skating and cat cafe backgrounds/map.","Replace individual music tracks and control looping.","Watch two NPCs talk without joining the scene.","Change the labels of your saved playthroughs.","Player/NPC employment. Requires City Life locations.","Choose an ex or a character who starts out disliking you.","Add or edit story direction during a playthrough.","Earn spirit and unleash a powerful positive story moment."};
+ for(int i=0;i<9;i++){if(choices[i]==null){choices[i]=new CheckBox();choices[i].Checked=true;choices[i].CheckedChanged+=(o,e)=>SyncDependencies();}int[] left={0,8,1,5,2,3};int[] right={4,6,7};int col=Array.IndexOf(left,i)>=0?0:1,row=col==0?Array.IndexOf(left,i):Array.IndexOf(right,i);int spacing=col==0?48:57;var c=choices[i];c.Text=names[i];c.Font=new Font("Segoe UI",10.5f,FontStyle.Bold);c.SetBounds(col*425,48+row*spacing,411,26);body.Controls.Add(c);var description=new Label();description.UseMnemonic=false;description.Text=details[i];description.SetBounds(col*425,76+row*spacing,404,24);description.Font=new Font("Segoe UI",8.5f);body.Controls.Add(description);
+ }
+
+ SyncDependencies();
+ var requirement=Label("For game 0.3.0 only. Test preview. Core story features remain bundled.",345,32);requirement.Font=new Font("Segoe UI",9,FontStyle.Bold);
+  next.Text="Let's begin";
  }else{title.Text=installed?"Welcome to the neighborhood.":"Point to the folder";step.Text=installed?"03  /  READY TO PLAY":"02  /  INSTALL YOUR MODS";
  Label("Save and close the game first. Point to the folder containing Venus University.exe.\r\nKeep a save backup; setup backs up the game archive automatically.",0,55);
  var field=Label("GAME FOLDER",68,23);field.Font=new Font("Segoe UI",9,FontStyle.Bold);

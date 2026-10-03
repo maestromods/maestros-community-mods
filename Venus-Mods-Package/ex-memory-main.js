@@ -53,3 +53,8 @@ function exMemEnrichRequest(request) {
   }
   return memory.text?{...clean,user:clean.user+'\n\n'+memory.text}:clean;
 }
+
+function exMemDeletePlaythrough(id) {
+  if(!fs.existsSync(path.join(getDataPath(),'ex-memory','memory.sqlite')))return;
+  const db=exMemDatabase();try{db.exec('BEGIN IMMEDIATE');for(const table of ['records','characters','snapshots'])db.prepare('DELETE FROM '+table+' WHERE playthrough=?').run(String(id));db.exec('COMMIT');}finally{db.close();}
+}

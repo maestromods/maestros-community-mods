@@ -4,7 +4,7 @@ function exValidatePlaythroughName(value) {
 }
 async function exReadPlaythroughName(id) {
   assertSafePlaythroughId(id);
-  try{const value=JSON.parse(await promises.readFile(path.join(getPlaythroughPath(id),'.ex-name'),'utf8'));return exValidatePlaythroughName(value.name);}
+  try{const value=JSON.parse(await promises.readFile(path.join(getPlaythroughPath(id),'.ex-name'),'utf8'));try{return exValidatePlaythroughName(value?.name);}catch{return null;}}
   catch(err){if(err.code==='ENOENT'||err instanceof SyntaxError)return null;throw err;}
 }
 async function exRenamePlaythrough(id,name) {

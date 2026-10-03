@@ -53,7 +53,7 @@ async function exLoadPlayerComments(key,ticket) {
     if(!response.ok)throw Error(response.error?.message||"Couldn't load comments. Your post is safe; try again.");
     const comments=exValidatePlayerComments(response.data,post);
     useGameStore.setState(s=>({exJournals:{...s.exJournals,[key]:{...s.exJournals[key],comments:exMergeJournalComments(comments,s.exJournals[key].comments),commentsReady:true}}}));
-    await writeDecisionPoint();
+    await exPersistModState();
   }finally{if(exPlayerPostRequests.get(lock)===ticket)exPlayerPostRequests.delete(lock);}
 }
 function ExPlayerCommentButton({post}) {
@@ -90,7 +90,7 @@ function ExPlayerComposer({onPublished}) {
       useGameStore.setState(s=>({exJournals:{...s.exJournals,[post.key]:post}}));
       setTitle("");setMood("");setBody("");onPublished();
       // Persist the player's words before any remote request; failures never erase them.
-      await writeDecisionPoint();
+      await exPersistModState();
       if(!alive())return;
       setStatus("Posted. Loading NPC comments…");
       await exLoadPlayerComments(post.key,ticket);

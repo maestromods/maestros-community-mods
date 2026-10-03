@@ -1,0 +1,7 @@
+/* Fit the paper and its shadow without turning the form itself into a scroller. */
+#player-name{box-sizing:border-box;width:min(1000px,calc(100% - 80px));padding:28px 38px;gap:14px;border-radius:32px 12px;overflow:visible;max-height:none;min-width:0}
+#player-name>.vu-tab{position:relative;inset:auto;align-self:flex-end;rotate:0deg;margin:0 0 4px;font-size:28px;padding:10px 28px}
+#player-name .vu-input--multiline{field-sizing:fixed;height:96px;min-height:96px;max-height:96px}
+#player-name .vu-field-hint{font-size:12px;line-height:1.4}
+#player-name .vu-who-stats{gap:8px}
+#player-name .vu-foot{margin-top:0}

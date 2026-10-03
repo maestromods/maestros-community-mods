@@ -1,0 +1,4 @@
+.vu-ex-rename{padding:10px 16px;color:var(--vu-text);font:500 12px/1.5 var(--font-body);align-self:center;max-width:260px}
+.vu-ex-rename form{display:flex;flex-wrap:wrap;gap:8px}.vu-ex-rename label{display:flex;flex-direction:column;gap:5px;width:100%}
+.vu-ex-rename input{box-sizing:border-box;width:100%;padding:9px;border:1px solid var(--vu-border);border-radius:8px;background:var(--vu-surface);color:var(--vu-text);font:inherit}
+.vu-ex-rename button,.vu-ex-rename .vu-btn{font:700 12px var(--font-body);padding:8px 12px;border:1px solid var(--vu-border);border-radius:10px;background:var(--vu-surface);color:var(--vu-text);cursor:pointer}
