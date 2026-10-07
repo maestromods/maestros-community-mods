@@ -11,7 +11,7 @@ if(mode==='uninstall'){
   throw Error('No installed code-mod record was found. Nothing changed.');
  }
  const r=JSON.parse(fs.readFileSync(record));
- if(r.mod!=='Venus Mods'||!['1.0.0','1.0.1','1.0.2','1.1.0','1.3.0','1.3.1','1.3.2','1.4.0','1.4.1','1.5.0-preview','1.5.1-preview','1.6.0-preview','1.6.1-preview','1.7.0','1.7.1'].includes(r.version))throw Error('Unrecognized installation record. Nothing changed.');
+ if(r.mod!=='Venus Mods'||!['1.0.0','1.0.1','1.0.2','1.1.0','1.3.0','1.3.1','1.3.2','1.4.0','1.4.1','1.5.0-preview','1.5.1-preview','1.6.0-preview','1.6.1-preview','1.7.0','1.7.1','1.8.0','1.8.1','1.8.2'].includes(r.version))throw Error('Unrecognized installation record. Nothing changed.');
  function verifiedBackup(meta,subfolder,expected){
   if(typeof meta.backup!=='string')throw Error('Missing backup path. Nothing changed.');
   const parent=path.resolve(root,subfolder),file=path.resolve(root,meta.backup);
@@ -66,5 +66,5 @@ const bits=selection;
 if(fs.existsSync(record)){const installed=JSON.parse(fs.readFileSync(record));if(mode==='check'&&sha(fs.readFileSync(archive))===installed.patchedSha256){console.log('Existing mods are installed. Uninstall before changing selections; older records use a different option layout.');process.exit(0);}throw Error('Venus Mods is already installed. Uninstall before changing selections.');}if(sha(fs.readFileSync(archive))!==BASE_SHA)throw Error('Requires the original unmodified Windows game 0.3.0');const r=patchArchive(archive,options);if(sha(r.bytes)!==manifest.combinations[bits])throw Error('Package source/assets differ from validated release. Rebuild and test before publishing your edited version.');
 if(mode==='check'){console.log('Compatible pristine base game 0.3.0; '+r.changes.length+' integrations verified. No files changed.');process.exit(0);}
 closed();const stamp=new Date().toISOString().replace(/[:.]/g,'-'),backup=path.join(root,'venus-mods-backups',stamp);fs.mkdirSync(backup,{recursive:true});fs.copyFileSync(archive,path.join(backup,'app.asar'),fs.constants.COPYFILE_EXCL);if(sha(fs.readFileSync(path.join(backup,'app.asar')))!==BASE_SHA)throw Error('Backup verification failed');
-const meta={selection:bits,mod:'Venus Mods',version:'1.7.1',baseVersion:'0.3.0',sourceSha256:BASE_SHA,patchedSha256:sha(r.bytes),backup:path.relative(root,path.join(backup,'app.asar')),installedAt:new Date().toISOString()};
+const meta={selection:bits,mod:'Venus Mods',version:'1.8.2',baseVersion:'0.3.0',sourceSha256:BASE_SHA,patchedSha256:sha(r.bytes),backup:path.relative(root,path.join(backup,'app.asar')),installedAt:new Date().toISOString()};
 const tmp=archive+'.venus-mods-'+stamp;fs.writeFileSync(tmp,r.bytes,{flag:'wx'});if(sha(fs.readFileSync(tmp))!==meta.patchedSha256)throw Error('Staging verification failed');fs.writeFileSync(record,JSON.stringify(meta,null,2),{flag:'wx'});try{fs.renameSync(tmp,archive);}catch(e){const recovery=archive+'.install-rollback-'+stamp;fs.copyFileSync(path.join(backup,'app.asar'),recovery);fs.renameSync(recovery,archive);fs.unlinkSync(record);throw e;}console.log('Community mods installed. Backup: '+backup+'\nLaunch your normal game executable.');

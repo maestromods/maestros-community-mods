@@ -1,12 +1,10 @@
-# Build this preview
+# Packaging and development
 
-Requires Windows, Node.js for development checks, PowerShell, and the .NET Framework C# compiler used by build.ps1.
+The distribution is the source tree itself. Package `mods.cmd`, `Venus-Mods-Package`, README.md, BUILD.md, VALIDATION.md, LICENSE and .gitignore together. Do not include game archives, test fixtures, save data, databases, credentials, build caches or an older setup executable.
 
-The source payload is Venus-Mods-Package. Setup.cs is the Windows installer; build.ps1 embeds the payload and background image. Run build.ps1 from this directory after validating changes. The script refuses to overwrite an existing dist/payload.zip.
+`Venus-Mods-Package/terminal.cjs` validates named-feature selection, then runs the existing `install.cjs` engine in the same process. This keeps the game runtime from being counted as an additional open game. Errors produce a nonzero exit status. `mods.cmd` collects interactive input using native CMD prompts before starting the runtime. It locates the game runtime and sets ELECTRON_RUN_AS_NODE inside its local environment. The underlying backup, staging, manifest and uninstall checks remain in install.cjs.
 
-Target game: Windows 0.3.0.
-Original archive SHA256: bf6d54c42d507d48415f5beb9a6950de5a216d307a6d4c42dc39e05e3c1ee72a
+Target: original Windows Venus University 0.3.0.
+Original archive SHA-256: bf6d54c42d507d48415f5beb9a6950de5a216d307a6d4c42dc39e05e3c1ee72a
 
-manifest.json records patched-archive hashes for every supported selection. Any changes to injected code or bundled venue assets require regeneration of that manifest and repeat validation. A successful syntax check alone is insufficient. Keep the exact-one-anchor checks, staging, backup checks and version restrictions intact.
-
-Distribute the compiled setup and SHA256.txt, or the source tree without test game copies, data, logs, credentials, databases or saves. The source does not include the base game. Do not publish an extracted original game archive.
+Changes to game patches or venue assets require regenerating manifest.json and verifying every supported selection. Do not weaken exact anchors, archive hashes or backup checks to force installation. No native game code or assets are supplied by the terminal launcher.
